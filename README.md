@@ -4,8 +4,21 @@ Harden the IaaS environment created by [the PCF pipelines](https://github.com/pi
 
 # Usage
 
-Apply the `harden-network` YAML patch to the `install-pcf` pipeline for AWS before loading the pipeline into Concourse. No
-additional parameters are required.
+Apply the `harden-network` YAML patch harden the IaaS as part of the `install-pcf` pipeline. Use the `harden-director` patch to assure that the created BOSH director is configured securely. There's also an ops file to assure that this repository is available to the pipeline.
+
+Assuming you've arleady edited the `params.yml` file for your installation, the
+
+```
+cat ${PCF_PIPELINES_DIR}/install-pcf/aws/pipeline.yml \
+  | yaml-patch -o ops/add-resource.yml -o ops/harden-network.yml -o ops/harden-director.yml \
+  > ${PCF_PIPELINES_DIR}/install-pcf/aws/patched-pipeline.yml
+cd ${PCF_PIPELINES_DIR}/install-pcf/aws
+fly -t ${CONCOURSE} set-pipeline -p deploy-pcf -c patched-pipeline.yml -l params.yml
+```
+
+If you want to omit one hardening step or another, leave out that specific ops file. You must apply the `add-resource` patch to use either of the other patches.
+
+*N.B. If you haven't used `yaml-patch` before, be aware that it will sort the keys of all of the hashes in your YAML document. I lost a couple of hours the first time I used it trying to understand the patching it had done when I didn't see the keys in the order I expected.*
 
 # Hardening Applied
 
@@ -15,6 +28,7 @@ additional parameters are required.
 
 # Limitations
 
+* Assumes pipeliens are downloaded from [pivnet](https://network.pivotal.io)
 * Currently supports only AWS.
 
 # To Do
@@ -23,7 +37,7 @@ additional parameters are required.
 1. Test further
 1. Add BOSH disk encryption (likely as another task)
 
-# Warning
+# Warnings
 
-*I quickly extracted this from my [bootstrap](https://github.com/crdant/bootstrap) repository and applied minimal testing.
+1. *I quickly extracted this from my [bootstrap](https://github.com/crdant/bootstrap) repository and applied minimal testing.
 This may bork your PCF environment.*
