@@ -1,7 +1,3 @@
-### we're going to use the existing opsman so don't find the ami
-- op: remove
-  path: /jobs/name=create-infrastructure/plan/task=find-ami
-
 ### using the existing database so don't prepare it
 - op: remove
   path: /jobs/name=create-infrastructure/plan/task=prepare-rds
