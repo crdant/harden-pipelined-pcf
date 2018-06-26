@@ -28,7 +28,7 @@ cd ${PCF_PIPELINES_DIR}/install-pcf/aws
 fly -t ${CONCOURSE} set-pipeline -p harden-pcf -c harden-pcf.yml -l params.yml
 ```
 
-*N.B. If you haven't used `yaml-patch` before, be aware that it will sort the keys of all of the hashes in your YAML document. I lost a couple of hours the first time I used it trying to understand the patching it had done when I didn't see the keys in the order I expected.*
+*N.B. If you haven't used `yaml-patch` before, be aware that it will sort the keys of all of the hashes in your YAML document. The unexpected sort caused me to lose a couple of hours the first time I used it.*
 
 # Hardening Applied
 
