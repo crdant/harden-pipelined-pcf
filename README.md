@@ -28,7 +28,7 @@ If you want to omit one hardening step or another, leave out that specific ops f
 
 # Limitations
 
-* Assumes pipeliens are downloaded from [pivnet](https://network.pivotal.io)
+* Assumes pipeliens are downloaded from [pivnet](https://network.pivotal.io).
 * Currently supports only AWS.
 
 # To Do
