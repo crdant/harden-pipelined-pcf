@@ -6,7 +6,6 @@
     type: git
     source:
       uri: https://github.com/crdant/harden-pipelined-pcf.git
-      branch: gcp-plan-patches
 
 ### Use the bootstrap code when creating the infrastructure
 - op: replace
