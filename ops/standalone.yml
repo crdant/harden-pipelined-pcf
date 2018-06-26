@@ -1,0 +1,24 @@
+### rename the pcf-pipelines output for input to hardening
+- op: remove
+  path: /jobs/name=create-infrastructure/plan/task=find-ami
+
+- op: remove
+  path: /jobs/name=create-infrastructure/plan/task=prepare-rds
+
+- op: remove
+  path: /jobs/name=upload-ert
+
+- op: remove
+  path: /jobs/name=deploy-ert
+
+- op: remove
+  path: /jobs/name=wipe-env
+
+### add a task to include the hardening terraform templates
+- op: add
+  path: /jobs/name=create-infrastructure/plan/0/aggregate/0/do/-
+  value:
+    task: preserve-opsman
+    file: harden-pipelined-pcf/tasks/preserve-opsman/aws/task.yml
+    params:
+      iaas: ((iaas))
