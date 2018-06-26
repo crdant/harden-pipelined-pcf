@@ -5,6 +5,7 @@ image_resource:
   type: docker-image
   source:
     repository: pcfnorm/rootfs
+    
 inputs:
   - name: pcf-pipelines-base
   - name: harden-pipelined-pcf
@@ -12,8 +13,9 @@ outputs:
   - name: pcf-pipelines
 
 run:
-  path: bootstrap/pipelines/tasks/harden-network/aws/task.sh
+  path: bootstrap/pipelines/tasks/harden-director/aws/task.sh
 
 params:
-  iaas:
-  region:
+  OPSMAN_DOMAIN_OR_IP_ADDRESS:
+  OPSMAN_USER:
+  OPSMAN_PASSWORD:

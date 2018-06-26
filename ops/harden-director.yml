@@ -1,0 +1,6 @@
+### Add a task that hardens the ops manager director configuration
+- op: add
+  path: /jobs/name=configure-director/plan/-
+  value:
+    task: encrypt-ebs
+    file: harden-pipelined-pcf/tasks/harden-director/aws/task.yml

@@ -1,0 +1,8 @@
+### Add a resource that includes the bootstrap source code to access custom tasks and terraform
+- op: add
+  path: /resources/-
+  value:
+    name: harden-pipelined-pcf
+    type: git
+    source:
+      uri: https://github.com/crdant/harden-pipelined-pcf.git
