@@ -22,7 +22,7 @@ Alternatively, you can create a standalone pipeline to apply these hardening ste
 
 ```
 cat ${PCF_PIPELINES_DIR}/install-pcf/aws/pipeline.yml \
-  | yaml-patch -o ops/add-resource.yml -o ops/harden-network.yml -o ops/harden-director.yml \
+  | yaml-patch -o ops/standalone.yml -o ops/add-resource.yml -o ops/harden-network.yml -o ops/harden-director.yml \
   > ${PCF_PIPELINES_DIR}/install-pcf/aws/harden-pcf.yml
 cd ${PCF_PIPELINES_DIR}/install-pcf/aws
 fly -t ${CONCOURSE} set-pipeline -p harden-pcf -c harden-pcf.yml -l params.yml
