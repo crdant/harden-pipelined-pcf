@@ -4,7 +4,7 @@ set -eu
 
 copy_templates () {
   cp -R pcf-pipelines-base/* pcf-pipelines
-  cp bootstrap/pipelines/tasks/harden-network/${iaas}/terraform/*.tf pcf-pipelines/install-pcf/${iaas}/terraform
+  cp harden-pipelined-pcfpipelines/tasks/harden-network/${iaas}/terraform/*.tf pcf-pipelines/install-pcf/${iaas}/terraform
 }
 
 get_ips() {

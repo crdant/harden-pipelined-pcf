@@ -13,7 +13,7 @@ outputs:
   - name: pcf-pipelines
 
 run:
-  path: bootstrap/pipelines/tasks/harden-director/aws/task.sh
+  path: harden-pipelined-pcfpipelines/tasks/harden-director/aws/task.sh
 
 params:
   OPSMAN_DOMAIN_OR_IP_ADDRESS:
