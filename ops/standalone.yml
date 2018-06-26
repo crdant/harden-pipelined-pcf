@@ -1,16 +1,22 @@
-### rename the pcf-pipelines output for input to hardening
+### we're going to use the existing opsman so don't find the ami
 - op: remove
   path: /jobs/name=create-infrastructure/plan/task=find-ami
 
+### using the existing database so don't prepare it
 - op: remove
   path: /jobs/name=create-infrastructure/plan/task=prepare-rds
 
+### remove everything to do with PAS (nee ERT)
 - op: remove
   path: /jobs/name=upload-ert
 
 - op: remove
   path: /jobs/name=deploy-ert
 
+- op: remove
+  path: /resources/name=pivnet-elastic-runtime
+  
+### Accidents happen, don't let a wipe happen from here
 - op: remove
   path: /jobs/name=wipe-env
 
