@@ -6,5 +6,5 @@ data "aws_instance" "opsman_az1" {
 }
 
 data "aws_eip" "opsman" {
-  public_ip = "${aws_instance.opsman_az1.public_ip}"
+  public_ip = "${data.aws_instance.opsman_az1.public_ip}"
 }
