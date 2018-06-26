@@ -18,11 +18,11 @@ fly -t ${CONCOURSE} set-pipeline -p deploy-pcf -c patched-pipeline.yml -l params
 
 If you want to omit one hardening step or another, leave out that specific ops file. You must apply the `prepare-pipeline` patch to use either of the other patches.
 
-Alternatively, you can create a standalone pipeline to apply these hardening steps. The `standalone` patch will update the `install-pcf` pipeline to refresh the infrastructure state, configure the director, and assure the director is deployed. All other steps of the pipeline will be deleted.
+Alternatively, you can create a standalone pipeline to apply these hardening steps. The `standalone` patch will update the `install-pcf` pipeline to refresh the infrastructure state, configure the director, and assure the director is deployed. All other steps of the pipeline will be deleted. Standalone must be applied last so that other patches don't fail.
 
 ```
 cat ${PCF_PIPELINES_DIR}/install-pcf/aws/pipeline.yml \
-  | yaml-patch -o ops/standalone.yml -o ops/prepare-pipeline.yml -o ops/harden-network.yml -o ops/harden-director.yml \
+  | yaml-patch -o ops/prepare-pipeline.yml -o ops/harden-network.yml -o ops/harden-director.yml -o ops/standalone.yml \
   > ${PCF_PIPELINES_DIR}/install-pcf/aws/harden-pcf.yml
 cd ${PCF_PIPELINES_DIR}/install-pcf/aws
 fly -t ${CONCOURSE} set-pipeline -p harden-pcf -c harden-pcf.yml -l params.yml

@@ -15,7 +15,7 @@
 
 - op: remove
   path: /resources/name=pivnet-elastic-runtime
-  
+
 ### Accidents happen, don't let a wipe happen from here
 - op: remove
   path: /jobs/name=wipe-env
@@ -28,3 +28,13 @@
     file: harden-pipelined-pcf/tasks/preserve-opsman/aws/task.yml
     params:
       iaas: ((iaas))
+
+### rename the `create-infrastructure` task for what it really does now
+- op: replace
+  path: /jobs/name=create-infrastructure/name
+  value: harden-infrastructure
+
+### rename the `create-infrastructure` task for what it really does now
+- op: replace
+  path: /jobs/name=deploy-director/name
+  value: update-director
