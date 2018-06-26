@@ -12,7 +12,7 @@ outputs:
   - name: pcf-pipelines
 
 run:
-  path: harden-pipelined-pcfpipelines/tasks/preserve-opsman/aws/task.sh
+  path: harden-pipelined-pcf/pipelines/tasks/preserve-opsman/aws/task.sh
 
 params:
   iaas:
