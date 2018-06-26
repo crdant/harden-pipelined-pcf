@@ -38,3 +38,7 @@
 - op: replace
   path: /jobs/name=deploy-director/name
   value: update-director
+
+- op: replace
+  path: /jobs/name=configure-director/plan/0/aggregate/get=terraform-state/passed
+  value: [harden-infrastructure]
