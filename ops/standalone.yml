@@ -29,3 +29,12 @@
 - op: replace
   path: /jobs/name=configure-director/plan/0/aggregate/get=terraform-state/passed
   value: [harden-infrastructure]
+
+- op: replace
+  path: /jobs/name=configure-director/plan/0/aggregate/get=terraform-state/passed
+  value: [harden-infrastructure]
+
+# make sure we trigger on the right thing when we apply the security changes
+- op: replace
+  path: /jobs/name=update-security-groups/plan/0/aggregate/get=terraform-state/passed
+  value: [harden-infrastructure]

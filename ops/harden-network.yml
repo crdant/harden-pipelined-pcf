@@ -22,3 +22,50 @@
     params:
       iaas: ((iaas))
       region: ((aws_region))
+
+# add a task to update security groups for cloud controller and bosh director
+- op: deploy
+  path: /jobs/-
+  value:
+    name: update-security-groups
+    plan:
+    - aggregate:
+      - do:
+        - get: pcf-pipelines-tarball
+        - config:
+            image_resource:
+              source:
+                repository: pcfnorm/rootfs
+                tag: v0.2.7
+              type: docker-image
+            inputs:
+            - name: pcf-pipelines-tarball
+            outputs:
+            - name: pcf-pipelines
+            platform: linux
+            run:
+              args:
+              - -c
+              - tar -xvf pcf-pipelines-tarball/*.tgz
+              path: bash
+          task: unpack-tarball
+      - get: terraform-state
+        passed:
+        - deploy-ert
+        trigger: true
+    - task: update-security-groups
+      file: harden-pipelined-pcf/tasks/update-security-groups/aws/task.yml
+      params:
+        OPS_MGR_PWD: ((opsman_admin_password))
+        OPS_MGR_USR: ((opsman_admin_username))
+        OPSMAN_DOMAIN_OR_IP_ADDRESS: ((opsman_domain_or_ip_address))
+    - task: deploy-ert
+      file: pcf-pipelines/tasks/apply-changes/task.yml
+      params:
+        OPSMAN_CLIENT_ID: ""
+        OPSMAN_CLIENT_SECRET: ""
+        OPSMAN_DOMAIN_OR_IP_ADDRESS: ((opsman_domain_or_ip_address))
+        OPSMAN_PASSWORD: ((opsman_admin_password))
+        OPSMAN_USERNAME: ((opsman_admin_username))
+    serial_groups:
+    - opsman
