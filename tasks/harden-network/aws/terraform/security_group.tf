@@ -154,6 +154,16 @@ resource "aws_security_group_rule" "pcfSG_ingress" {
   security_group_id = "${aws_security_group.pcfSG.id}"
 }
 
+resource "aws_security_group_rule" "pcfSG_egress_pcf" {
+  type            = "egress"
+  from_port = 0
+  to_port = 0
+  protocol = "-1"
+  cidr_blocks = ["${var.vpc_cidr}"]
+
+  security_group_id = "${aws_security_group.pcfSG.id}"
+}
+
 resource "aws_security_group_rule" "pcfSG_egress_PcfHttpElbSg_443" {
   type            = "egress"
   from_port       = 443
