@@ -196,6 +196,26 @@ resource "aws_security_group" "cloud_controller" {
   }
 }
 
+resource "aws_security_group_rule" "cloud_controller_ingress" {
+  type            = "ingress"
+  protocol        = -1
+  from_port       = 0
+  to_port         = 0
+  cidr_blocks     = [ "${aws_vpc.PcfVpc.cidr_block}" ]
+
+  security_group_id = "${aws_security_group.cloud_controller.id}"
+}
+
+resource "aws_security_group_rule" "cloud_controller_pcf_egress" {
+  type            = "egress"
+  protocol        = -1
+  from_port       = 0
+  to_port         = 0
+  cidr_blocks     = [ "${aws_vpc.PcfVpc.cidr_block}" ]
+
+  security_group_id = "${aws_security_group.cloud_controller.id}"
+}
+
 resource "aws_security_group_rule" "cloud_controller_egress_for_s3_tls" {
   type            = "egress"
   protocol        = "tcp"
