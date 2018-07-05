@@ -205,3 +205,11 @@ resource "aws_security_group_rule" "cloud_controller_egress_for_s3" {
 
   security_group_id = "${aws_security_group.cloud_controller.id}"
 }
+
+output "director_security_group" {
+  value = "${aws_security_group.directorSG.id}"
+}
+
+output "cloud_controller_security_group" {
+  value = "${aws_security_group.cloud_controller.id}"
+}
