@@ -35,14 +35,6 @@ data "aws_security_group" "pcf_default" {
 ## Added rules
 
 # opsman/director
-resource "aws_security_group_rule" "opsman_ingress_default" {
-    type = "ingress"
-    from_port = 0
-    to_port = 0
-    protocol = -1
-    cidr_blocks = ["${data.aws_vpc.pcf.cidr_block}"]
-    security_group_id = "${data.aws_security_group.opsman.id}"
-}
 
 resource "aws_security_group_rule" "opsman_egress_default" {
   type            = "egress"
@@ -103,16 +95,6 @@ resource "aws_security_group_rule" "opsman_egress_for_github" {
 
 # PCF
 
-resource "aws_security_group_rule" "pcf_ingress" {
-  type            = "ingress"
-  from_port = 0
-  to_port = 0
-  protocol = "-1"
-  cidr_blocks = ["${data.aws_vpc.pcf.cidr_block}"]
-
-  security_group_id = "${data.aws_security_group.pcf_default.id}"
-}
-
 resource "aws_security_group_rule" "pcf_egress_pcf" {
   type            = "egress"
   from_port = 0
@@ -123,7 +105,7 @@ resource "aws_security_group_rule" "pcf_egress_pcf" {
   security_group_id = "${data.aws_security_group.pcf_default.id}"
 }
 
-resource "aws_security_group_rule" "pcf_egress_PcfHttpElbSg_443" {
+resource "aws_security_group_rule" "pcf_egress_http_elb_443" {
   type            = "egress"
   from_port       = 443
   to_port         = 443
@@ -132,7 +114,7 @@ resource "aws_security_group_rule" "pcf_egress_PcfHttpElbSg_443" {
   security_group_id = "${data.aws_security_group.pcf_default.id}"
 }
 
-resource "aws_security_group_rule" "pcf_egress_PcfHttpElbSg_4443" {
+resource "aws_security_group_rule" "pcf_egress_http_elb_4443" {
   type            = "egress"
   from_port       = 4443
   to_port         = 4443
