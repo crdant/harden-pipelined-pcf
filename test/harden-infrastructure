@@ -57,11 +57,6 @@ parse_args () {
   fi
 }
 
-main () {
-  parse_args $@
-  execute
-}
-
 execute () {
   export prefix
   export region
@@ -92,6 +87,11 @@ execute () {
   if [[ -f "${output_dir}/terraform.tfstate" ]] ; then
     cp ${output_dir}/terraform.tfstate ${state_dir}/terraform.tfstate
   fi
+}
+
+main () {
+  parse_args $@
+  execute
 }
 
 main $@
