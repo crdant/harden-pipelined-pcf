@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+
+set -eu
+
+base_dir="$(dirname $(dirname $0))"
+incomplete=0
+prefix=
+target=
+region=
+
+usage () {
+  message="$(basename $0) --target CONCOURSE_TARGET --prefix TERRAFORM_PREFIX --region AWS_REGION"
+  (>&2 echo "${message}")
+}
+
+parse_args () {
+  if [[ $# -gt 0 ]]; then
+    while [ $# -gt 0 ]; do
+      case $1 in
+        --target | -t )
+          target=$2
+          shift
+          ;;
+        --prefix | -p )
+          prefix=$2
+          shift
+          ;;
+        --region | -r )
+          region=$2
+          shift
+          ;;
+        * )
+          (>&2 echo "Unrecognized option: $1")
+          usage
+          exit 1
+          ;;
+      esac
+      shift
+    done
+  fi
+
+  if [[ -z "${target}" ]] ; then
+    incomplete=1
+  fi
+
+  if [[ -z "${prefix}" ]] ; then
+    incomplete=1
+  fi
+
+  if [[ -z "${region}" ]] ; then
+    incomplete=1
+  fi
+
+  if [[ ${incomplete} -ne 0 ]] ; then
+    usage
+    exit ${incomplete}
+  fi
+}
+
+main () {
+  parse_args $@
+  execute
+}
+
+execute () {
+  export prefix
+  export region
+  export access_key_id=${AWS_ACCESS_KEY_ID}
+  export secret_access_key=${AWS_SECRET_ACCESS_KEY}
+  export state_dir="${base_dir}/state"
+  export output_dir="${base_dir}/output"
+  export iaas=aws
+
+  if [[ ! -d "${state_dir}" ]] ; then
+    mkdir "${state_dir}"
+  fi
+
+  if [[ ! -f "${state_dir}/terraform.tfstsate" ]] ; then
+    touch "${state_dir}/terraform.tfstsate"
+  fi
+
+  if [[ ! -d "${output_dir}" ]] ; then
+    mkdir "${output_dir}"
+  fi
+
+  fly --target ${target} execute \
+    --config ${base_dir}/tasks/harden-infrastructure/aws/task.yml \
+    --input harden-pipelined-pcf=${base_dir} \
+    --input terraform-state-input=${state_dir} \
+    --output terraform-state-output=${output_dir}
+
+  if [[ -f "${output_dir}/terraform.tfstate" ]] ; then
+    cp ${output_dir}/terraform.tfstate ${state_dir}/terraform.tfstate
+  fi
+}
+
+main $@

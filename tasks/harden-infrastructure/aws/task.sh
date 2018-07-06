@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 set -eu
 
@@ -11,12 +11,14 @@ get_ips() {
 }
 
 init () {
-  terraform init ${template_dir}
+  echo "Initializing terraform..."
+  terraform init --input=false "${template_dir}"
 }
 
 plan () {
+  echo "Planning terraform execution..."
   terraform plan \
-    --state ${state_dir}/terraform.tfstate
+    --state ${state_dir}/terraform.tfstate \
     --var "prefix=${prefix}" \
     --var "access_key_id=${access_key_id}" \
     --var "secret_access_key=${secret_access_key}" \
@@ -29,12 +31,13 @@ plan () {
 }
 
 apply () {
+  echo "Executing terraform plan..."
   terraform apply \
     --state-out ${output_dir}/terraform.tfstate \
     ${terraform_plan}
 }
 
-terraform () {
+harden () {
   init
   plan
   apply
@@ -42,7 +45,7 @@ terraform () {
 
 main () {
   get_ips
-  terraform
+  harden
 }
 
-main
+main $@
