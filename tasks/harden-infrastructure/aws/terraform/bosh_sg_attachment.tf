@@ -8,7 +8,7 @@ data "aws_instances" "bosh" {
   instance_state_names = [ "running", "stopped" ]
 }
 
-resource "aws_network_interface_sg_attachment" "bosh_sg_attachment" {
-  security_group_id    = "${aws_security_group.opsman.id}"
-  network_interface_id = "${aws_instance.bosh.*.primary_network_interface_id}"
+resource "aws_network_interface_sg_attachment" "bosh" {
+  security_group_id    = "${data.aws_security_group.opsman.id}"
+  network_interface_id = "${data.aws_instances.bosh.*.primary_network_interface_id}"
 }

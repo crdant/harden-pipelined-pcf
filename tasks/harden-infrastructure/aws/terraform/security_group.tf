@@ -28,6 +28,10 @@ data "aws_security_group" "pcf_tcp_lb" {
   name = "${var.prefix}-pcf_PcfTcpElb_sg"
 }
 
+data "aws_security_group" "pcf_default" {
+  name = "${var.prefix}-pcf_vms_sg"
+}
+
 ## Added rules
 
 # opsman/director
@@ -36,7 +40,7 @@ resource "aws_security_group_rule" "opsman_ingress_default" {
     from_port = 0
     to_port = 0
     protocol = -1
-    cidr_blocks = ["${data.aws_vpc.pcf_vpc.cidr_block}"]
+    cidr_blocks = ["${data.aws_vpc.pcf.cidr_block}"]
     security_group_id = "${data.aws_security_group.opsman.id}"
 }
 
@@ -45,7 +49,7 @@ resource "aws_security_group_rule" "opsman_egress_default" {
   protocol        = "-1"
   from_port       = "0"
   to_port         = "0"
-  cidr_blocks     = ["${data.aws_vpc.pcf_vpc.cidr_block}"]
+  cidr_blocks     = ["${data.aws_vpc.pcf.cidr_block}"]
   security_group_id = "${data.aws_security_group.opsman.id}"
 }
 
@@ -104,9 +108,9 @@ resource "aws_security_group_rule" "pcf_ingress" {
   from_port = 0
   to_port = 0
   protocol = "-1"
-  cidr_blocks = ["${data.aws_vpc.pcf_vpc.cidr_block}"]
+  cidr_blocks = ["${data.aws_vpc.pcf.cidr_block}"]
 
-  security_group_id = "${aws_security_group.pcfSG.id}"
+  security_group_id = "${data.aws_security_group.pcf_default.id}"
 }
 
 resource "aws_security_group_rule" "pcf_egress_pcf" {
@@ -114,9 +118,9 @@ resource "aws_security_group_rule" "pcf_egress_pcf" {
   from_port = 0
   to_port = 0
   protocol = "-1"
-  cidr_blocks = ["${data.aws_vpc.pcf_vpc.cidr_block}"]
+  cidr_blocks = ["${data.aws_vpc.pcf.cidr_block}"]
 
-  security_group_id = "${aws_security_group.pcfSG.id}"
+  security_group_id = "${data.aws_security_group.pcf_default.id}"
 }
 
 resource "aws_security_group_rule" "pcf_egress_PcfHttpElbSg_443" {
@@ -124,8 +128,8 @@ resource "aws_security_group_rule" "pcf_egress_PcfHttpElbSg_443" {
   from_port       = 443
   to_port         = 443
   protocol        = "tcp"
-  source_security_group_id = "${aws_elb.PcfHttpElb.source_security_group_id}"
-  security_group_id = "${aws_security_group.pcfSG.id}"
+  source_security_group_id = "${data.aws_elb.pcf_http.source_security_group_id}"
+  security_group_id = "${data.aws_security_group.pcf_default.id}"
 }
 
 resource "aws_security_group_rule" "pcf_egress_PcfHttpElbSg_4443" {
@@ -133,8 +137,8 @@ resource "aws_security_group_rule" "pcf_egress_PcfHttpElbSg_4443" {
   from_port       = 4443
   to_port         = 4443
   protocol        = "tcp"
-  source_security_group_id = "${aws_elb.PcfHttpElb.source_security_group_id}"
-  security_group_id = "${aws_security_group.pcfSG.id}"
+  source_security_group_id = "${data.aws_elb.pcf_http.source_security_group_id}"
+  security_group_id = "${data.aws_security_group.pcf_default.id}"
 }
 
 ### Additional security groups
@@ -142,7 +146,7 @@ resource "aws_security_group_rule" "pcf_egress_PcfHttpElbSg_4443" {
 resource "aws_security_group" "cloud_controller" {
   name        = "cloud-controller-security-group"
   description = "Allow cloud controller to access EC2 and S3"
-  vpc_id      = "${data.aws_vpc.pcf_vpc.id}"
+  vpc_id      = "${data.aws_vpc.pcf.id}"
 
   tags {
     Name = "cloud-controller-security-group"
@@ -158,7 +162,7 @@ resource "aws_security_group_rule" "cloud_controller_ingress" {
   protocol        = -1
   from_port       = 0
   to_port         = 0
-  cidr_blocks     = [ "${aws_vpc.PcfVpc.cidr_block}" ]
+  cidr_blocks     = [ "${data.aws_vpc.pcf.cidr_block}" ]
 
   security_group_id = "${aws_security_group.cloud_controller.id}"
 }
@@ -168,7 +172,7 @@ resource "aws_security_group_rule" "cloud_controller_pcf_egress" {
   protocol        = -1
   from_port       = 0
   to_port         = 0
-  cidr_blocks     = [ "${aws_vpc.PcfVpc.cidr_block}" ]
+  cidr_blocks     = [ "${data.aws_vpc.pcf.cidr_block}" ]
 
   security_group_id = "${aws_security_group.cloud_controller.id}"
 }
