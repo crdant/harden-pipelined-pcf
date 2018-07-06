@@ -13,19 +13,19 @@ variable "cloudfront_ips" {
 
 ### Extant Security Groups
 data "aws_security_group" "opsman" {
-    name = "${var.prefix}-pcf_opsman_sg"
+  name = "${var.prefix}-pcf_opsman_sg"
 }
 
 data "aws_security_group" "pcf_http_lb" {
-  name        = "${var.prefix}-pcf_PcfHttpElb_sg"
+  name = "${var.prefix}-pcf_PcfHttpElb_sg"
 }
 
 data "aws_security_group" "pcf_ssh_lb" {
-  name        = "${var.prefix}-pcf_PcfSshElb_sg"
+  name = "${var.prefix}-pcf_PcfSshElb_sg"
 }
 
 data "aws_security_group" "pcf_tcp_lb" {
-  name        = "${var.prefix}-pcf_PcfTcpElb_sg"
+  name = "${var.prefix}-pcf_PcfTcpElb_sg"
 }
 
 ## Added rules
@@ -191,4 +191,10 @@ resource "aws_security_group_rule" "cloud_controller_egress_for_s3" {
   prefix_list_ids = [ "${aws_vpc_endpoint.s3.prefix_list_id}" ]
 
   security_group_id = "${aws_security_group.cloud_controller.id}"
+}
+
+### Outputs for scripts to use
+
+output "cloud_controller_security_group_id" {
+  value = "aws_security_group.cloud_controller.id"
 }
