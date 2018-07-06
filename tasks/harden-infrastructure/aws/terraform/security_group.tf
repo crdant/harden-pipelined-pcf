@@ -1,170 +1,125 @@
-/*
-  Security Group Definitions
-*/
-
-/*
-  Ops Manager Security group
-*/
-resource "aws_security_group" "directorSG" {
-    name = "${var.prefix}-pcf_director_sg"
-    description = "Allow incoming connections for Ops Manager."
-    vpc_id = "${aws_vpc.PcfVpc.id}"
-    tags {
-        Name = "${var.prefix}-Ops Manager Director Security Group"
-    }
+### Variables
+variable "github_ips" {
+  type = "list"
 }
 
-resource "aws_security_group_rule" "allow_directorsg_ingress_default" {
+variable "ec2_ips" {
+  type = "list"
+}
+
+variable "cloudfront_ips" {
+  type = "list"
+}
+
+### Extant Security Groups
+data "aws_security_group" "opsman" {
+    name = "${var.prefix}-pcf_opsman_sg"
+}
+
+data "aws_security_group" "pcf_http_lb" {
+  name        = "${var.prefix}-pcf_PcfHttpElb_sg"
+}
+
+data "aws_security_group" "pcf_ssh_lb" {
+  name        = "${var.prefix}-pcf_PcfSshElb_sg"
+}
+
+data "aws_security_group" "pcf_tcp_lb" {
+  name        = "${var.prefix}-pcf_PcfTcpElb_sg"
+}
+
+## Added rules
+
+# opsman/director
+resource "aws_security_group_rule" "opsman_ingress_default" {
     type = "ingress"
     from_port = 0
     to_port = 0
     protocol = -1
-    cidr_blocks = ["${var.vpc_cidr}"]
-    security_group_id = "${aws_security_group.directorSG.id}"
+    cidr_blocks = ["${data.aws_vpc.pcf_vpc.cidr_block}"]
+    security_group_id = "${data.aws_security_group.opsman.id}"
 }
 
-resource "aws_security_group_rule" "director_egress_default" {
+resource "aws_security_group_rule" "opsman_egress_default" {
   type            = "egress"
   protocol        = "-1"
   from_port       = "0"
   to_port         = "0"
-  cidr_blocks     = ["${var.vpc_cidr}"]
-  security_group_id = "${aws_security_group.directorSG.id}"
+  cidr_blocks     = ["${data.aws_vpc.pcf_vpc.cidr_block}"]
+  security_group_id = "${data.aws_security_group.opsman.id}"
 }
 
-resource "aws_security_group_rule" "director_egress_dns" {
+resource "aws_security_group_rule" "opsman_egress_dns" {
   type            = "egress"
   protocol        = "udp"
   from_port       = "53"
   to_port         = "53"
   cidr_blocks     = ["0.0.0.0/0"]
-  security_group_id = "${aws_security_group.directorSG.id}"
+  security_group_id = "${data.aws_security_group.opsman.id}"
 }
 
-resource "aws_security_group_rule" "director_egress_ntp" {
+resource "aws_security_group_rule" "opsman_egress_ntp" {
   type            = "egress"
   protocol        = "udp"
   from_port       = "123"
   to_port         = "123"
   cidr_blocks     = ["0.0.0.0/0"]
-  security_group_id = "${aws_security_group.directorSG.id}"
+  security_group_id = "${data.aws_security_group.opsman.id}"
 }
 
-resource "aws_security_group_rule" "director_egress_for_s3" {
+resource "aws_security_group_rule" "opsman_egress_for_s3" {
   type            = "egress"
   protocol        = "-1"
   from_port       = "0"
   to_port         = "0"
   prefix_list_ids = [ "${aws_vpc_endpoint.s3.prefix_list_id}" ]
 
-  security_group_id = "${aws_security_group.directorSG.id}"
+  security_group_id = "${data.aws_security_group.opsman.id}"
 }
 
-/*
-resource "aws_security_group_rule" "director_egress_for_ec2" {
-  type            = "egress"
-  protocol        = "tcp"
-  from_port       = "443"
-  to_port         = "443"
-
-  security_group_id = "${aws_security_group.directorSG.id}"
-}
-*/
-
-resource "aws_security_group_rule" "director_egress_for_cloudfront" {
+resource "aws_security_group_rule" "opsman_egress_for_cloudfront" {
   type        = "egress"
   protocol    = "tcp"
   from_port   = "443"
   to_port     = "443"
   cidr_blocks = [ "${var.cloudfront_ips}" ]
 
-  security_group_id = "${aws_security_group.directorSG.id}"
+  security_group_id = "${data.aws_security_group.opsman.id}"
 }
 
-resource "aws_security_group_rule" "director_egress_for_github" {
+resource "aws_security_group_rule" "opsman_egress_for_github" {
   type        = "egress"
   protocol    = "tcp"
   from_port   = "443"
   to_port     = "443"
   cidr_blocks = [ "${var.github_ips}" ]
 
-  security_group_id = "${aws_security_group.directorSG.id}"
+  security_group_id = "${data.aws_security_group.opsman.id}"
 }
 
+# PCF
 
-resource "aws_security_group_rule" "allow_ssh" {
-    count           = "${var.opsman_allow_ssh}"
-    type            = "ingress"
-    from_port       = 22
-    to_port         = 22
-    protocol        = "tcp"
-    cidr_blocks     = "${var.opsman_allow_ssh_cidr_ranges}"
-
-    security_group_id = "${aws_security_group.directorSG.id}"
-}
-
-resource "aws_security_group_rule" "allow_https" {
-    count           = "${var.opsman_allow_https}"
-    type            = "ingress"
-    from_port       = 443
-    to_port         = 443
-    protocol        = "tcp"
-    cidr_blocks     = "${var.opsman_allow_https_cidr_ranges}"
-
-    security_group_id = "${aws_security_group.directorSG.id}"
-}
-
-/*
-  RDS Security group
-*/
-resource "aws_security_group" "rdsSG" {
-    name = "${var.prefix}-pcf_rds_sg"
-    description = "Allow incoming connections for RDS."
-    vpc_id = "${aws_vpc.PcfVpc.id}"
-    tags {
-        Name = "${var.prefix}-RDS Security Group"
-    }
-    ingress {
-        from_port = 3306
-        to_port = 3306
-        protocol = "tcp"
-        cidr_blocks = ["${var.vpc_cidr}"]
-    }
-}
-
-/*
-  PCF VMS Security group
-*/
-resource "aws_security_group" "pcfSG" {
-    name = "${var.prefix}-pcf_vms_sg"
-    description = "Allow connections between PCF VMs."
-    vpc_id = "${aws_vpc.PcfVpc.id}"
-    tags {
-        Name = "${var.prefix}-PCF VMs Security Group"
-    }
-}
-
-resource "aws_security_group_rule" "pcfSG_ingress" {
+resource "aws_security_group_rule" "pcf_ingress" {
   type            = "ingress"
   from_port = 0
   to_port = 0
   protocol = "-1"
-  cidr_blocks = ["${var.vpc_cidr}"]
+  cidr_blocks = ["${data.aws_vpc.pcf_vpc.cidr_block}"]
 
   security_group_id = "${aws_security_group.pcfSG.id}"
 }
 
-resource "aws_security_group_rule" "pcfSG_egress_pcf" {
+resource "aws_security_group_rule" "pcf_egress_pcf" {
   type            = "egress"
   from_port = 0
   to_port = 0
   protocol = "-1"
-  cidr_blocks = ["${var.vpc_cidr}"]
+  cidr_blocks = ["${data.aws_vpc.pcf_vpc.cidr_block}"]
 
   security_group_id = "${aws_security_group.pcfSG.id}"
 }
 
-resource "aws_security_group_rule" "pcfSG_egress_PcfHttpElbSg_443" {
+resource "aws_security_group_rule" "pcf_egress_PcfHttpElbSg_443" {
   type            = "egress"
   from_port       = 443
   to_port         = 443
@@ -173,7 +128,7 @@ resource "aws_security_group_rule" "pcfSG_egress_PcfHttpElbSg_443" {
   security_group_id = "${aws_security_group.pcfSG.id}"
 }
 
-resource "aws_security_group_rule" "pcfSG_egress_PcfHttpElbSg_4443" {
+resource "aws_security_group_rule" "pcf_egress_PcfHttpElbSg_4443" {
   type            = "egress"
   from_port       = 4443
   to_port         = 4443
@@ -182,10 +137,12 @@ resource "aws_security_group_rule" "pcfSG_egress_PcfHttpElbSg_4443" {
   security_group_id = "${aws_security_group.pcfSG.id}"
 }
 
+### Additional security groups
+
 resource "aws_security_group" "cloud_controller" {
   name        = "cloud-controller-security-group"
   description = "Allow cloud controller to access EC2 and S3"
-  vpc_id      = "${aws_vpc.PcfVpc.id}"
+  vpc_id      = "${data.aws_vpc.pcf_vpc.id}"
 
   tags {
     Name = "cloud-controller-security-group"
@@ -234,12 +191,4 @@ resource "aws_security_group_rule" "cloud_controller_egress_for_s3" {
   prefix_list_ids = [ "${aws_vpc_endpoint.s3.prefix_list_id}" ]
 
   security_group_id = "${aws_security_group.cloud_controller.id}"
-}
-
-output "director_security_group" {
-  value = "${aws_security_group.directorSG.id}"
-}
-
-output "cloud_controller_security_group" {
-  value = "${aws_security_group.cloud_controller.id}"
 }
