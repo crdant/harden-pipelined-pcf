@@ -1,14 +1,17 @@
-data "aws_instances" "bosh" {
+data "aws_instance" "bosh" {
   instance_tags {
     deployment = "p-bosh"
     instance_group = "bosh"
     job = "bosh"
   }
 
-  instance_state_names = [ "running", "stopped" ]
+  filter {
+    name = "instance-state-name"
+    values = [ "running" ]
+  }
 }
 
 resource "aws_network_interface_sg_attachment" "bosh" {
   security_group_id    = "${data.aws_security_group.opsman.id}"
-  network_interface_id = "${data.aws_instances.bosh.*.primary_network_interface_id}"
+  network_interface_id = "${data.aws_instance.bosh.network_interface_id}"
 }
