@@ -1,19 +1,20 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 set -eu
 
 set_encrypted_disks () {
-  read -r -d '' iaas_configuration <<EOF
-  {
-    "encrypted": true
-  }
-EOF
+  local iaas_configuration="$(
+    jq -n \
+      '{
+          "encrypted": true
+       }'
+    )"
 
   om-linux \
-    --target https://${OPSMAN_DOMAIN_OR_IP_ADDRESS} \
+    --target "$opsman_target" \
+    --username "$opsman_user" \
+    --password "$opsman_password" \
     --skip-ssl-validation \
-    --username "$OPSMAN_USER" \
-    --password "$OPSMAN_PASSWORD" \
     configure-director \
     --iaas-configuration "$iaas_configuration"
 }
