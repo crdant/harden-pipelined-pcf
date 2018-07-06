@@ -43,6 +43,16 @@ resource "aws_security_group_rule" "opsman_egress_default" {
   to_port         = "0"
   cidr_blocks     = ["${data.aws_vpc.pcf.cidr_block}"]
   security_group_id = "${data.aws_security_group.opsman.id}"
+
+  # once we have a new default for accessing PCF VMs, remove the old wide-open one
+  # TODO: sort out why `environment` didn't work as expected
+  provisioner "local-exec" {
+    command = <<CMD
+      export AWS_ACCESS_KEY_ID="${var.access_key_id}"
+      export AWS_SECRET_ACCESS_KEY="${var.secret_access_key}"
+      aws ec2 revoke-security-group-egress --group-id ${data.aws_security_group.opsman.id} --cidr 0.0.0.0/0 --protocol all --port 0-65535 --region ${var.region}
+    CMD
+  }
 }
 
 resource "aws_security_group_rule" "opsman_egress_dns" {
@@ -103,6 +113,16 @@ resource "aws_security_group_rule" "pcf_egress_pcf" {
   cidr_blocks = ["${data.aws_vpc.pcf.cidr_block}"]
 
   security_group_id = "${data.aws_security_group.pcf_default.id}"
+
+  # once we have a new default for accessing PCF VMs, remove the old wide-open one
+  # TODO: sort out why `environment` didn't work as expected
+  provisioner "local-exec" {
+    command = <<CMD
+      export AWS_ACCESS_KEY_ID="${var.access_key_id}"
+      export AWS_SECRET_ACCESS_KEY="${var.secret_access_key}"
+      aws ec2 revoke-security-group-egress --group-id ${data.aws_security_group.pcf_default.id} --cidr 0.0.0.0/0 --protocol all --port 0-65535 --region ${var.region}
+    CMD
+  }
 }
 
 resource "aws_security_group_rule" "pcf_egress_http_elb_443" {
