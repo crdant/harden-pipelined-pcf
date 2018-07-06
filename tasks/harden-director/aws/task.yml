@@ -7,15 +7,14 @@ image_resource:
     repository: pcfnorm/rootfs
 
 inputs:
-  - name: pcf-pipelines-base
-  - name: harden-pipelined-pcf
+- name: harden-pipelined-pcf
+
 outputs:
-  - name: pcf-pipelines
 
 run:
   path: harden-pipelined-pcf/tasks/harden-director/aws/task.sh
 
 params:
-  OPSMAN_DOMAIN_OR_IP_ADDRESS:
-  OPSMAN_USER:
-  OPSMAN_PASSWORD:
+  opsman_target:
+  opsman_user:
+  opsman_password:

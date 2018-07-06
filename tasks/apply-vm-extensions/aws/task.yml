@@ -8,13 +8,15 @@ image_resource:
     tag: v0.2.7
 
 inputs:
-- name: pcf-pipelines
-- name: terraform-state
+- name: terraform-state-input
+
+outputs:
+- name: terraform-state-output
 
 run:
-  path: pcf-pipelines/tasks/configure-ert/task.sh
+  path: harden-pipelined-pcf/tasks/apply-vm-extensioins/aws/task.sh
 
 params:
-  OPSMAN_DOMAIN_OR_IP_ADDRESS:
-  OPS_MGR_USR:
-  OPS_MGR_PWD:
+  opsman_target:
+  opsman_user:
+  opsman_password:

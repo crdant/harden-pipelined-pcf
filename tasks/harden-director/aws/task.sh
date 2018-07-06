@@ -2,13 +2,12 @@
 
 set -eu
 
-update_director_config () {
+set_encrypted_disks () {
   read -r -d '' iaas_configuration <<EOF
   {
     "encrypted": true
   }
-  EOF
-
+EOF
 
   om-linux \
     --target https://${OPSMAN_DOMAIN_OR_IP_ADDRESS} \
@@ -16,7 +15,11 @@ update_director_config () {
     --username "$OPSMAN_USER" \
     --password "$OPSMAN_PASSWORD" \
     configure-director \
-    --iaas-configuration "$iaas_configuration" \
+    --iaas-configuration "$iaas_configuration"
 }
 
-update_director_config
+main () {
+  set_encrypted_disks
+}
+
+main
