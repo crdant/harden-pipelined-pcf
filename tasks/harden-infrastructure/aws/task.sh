@@ -2,6 +2,8 @@
 
 set -eu
 
+terraform_plan=${work_dir}/terraform.tfplan
+
 copy_templates () {
   cp -R pcf-pipelines-base/* pcf-pipelines
   cp harden-pipelined-pcf/tasks/harden-network/${iaas}/terraform/*.tf pcf-pipelines/install-pcf/${iaas}/terraform
@@ -13,5 +15,40 @@ get_ips() {
   github_ips=$(curl -s https://api.github.com/meta | jq '.git')
 }
 
-copy_templates
-get_ips
+init () {
+  terraform init ${template_dir}
+}
+
+plan () {
+  terraform plan \
+    --state ${state_dir}/terraform.tfstate
+    --var "prefix=${prefix}" \
+    --var "access_key_id=${access_key_id}" \
+    --var "secret_access_key=${secret_access_key}" \
+    --var "region=${region}" \
+    --var "github_ips=${github_ips}" \
+    --var "ec2_ips=${ec2_ips}" \
+    --var "cloudfront_ips=${cloudfront_ips}" \
+    --out "${terraform_plan}" \
+    ${template_dir}
+}
+
+apply () {
+  terraform apply \
+    --state-out ${output_dir}/terraform.tfstate \
+    ${terraform_plan}
+}
+
+terraform () {
+  init
+  plan
+  apply
+}
+
+main () {
+  copy_templates
+  get_ips
+  terraform
+}
+
+main

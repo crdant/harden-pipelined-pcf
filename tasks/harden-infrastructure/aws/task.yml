@@ -17,5 +17,12 @@ run:
   path: harden-pipelined-pcf/tasks/harden-infrastructure/aws/task.sh
 
 params:
-  iaas:
+  access_key_id:
+  secret_access_key:
   region:
+  prefix:
+  iaas: aws
+  work_dir: .
+  state_dir: terraform-state-input
+  output_dir: terraform-state-output
+  template_dir: harden-pipelined-pcf/harden-infrastructure/aws/terraform
