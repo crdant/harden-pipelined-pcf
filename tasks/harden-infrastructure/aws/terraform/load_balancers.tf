@@ -35,11 +35,10 @@ locals {
 }
 
 resource "null_resource" "elb_forward_ssl" {
-  /*
   triggers = {
     load_balancer_id = "${data.aws_elb.pcf_http.id}"
   }
- */
+
   provisioner "local-exec" {
     command = <<CMD
       export AWS_ACCESS_KEY_ID="${var.access_key_id}"
