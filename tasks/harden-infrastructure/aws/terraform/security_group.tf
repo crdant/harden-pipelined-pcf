@@ -126,12 +126,12 @@ resource "aws_security_group_rule" "pcf_egress_http_elb_4443" {
 ### Additional security groups
 
 resource "aws_security_group" "cloud_controller" {
-  name        = "cloud-controller-security-group"
+  name        = "${var.prefix}-capi-security-group"
   description = "Allow cloud controller to access EC2 and S3"
   vpc_id      = "${data.aws_vpc.pcf.id}"
 
   tags {
-    Name = "cloud-controller-security-group"
+    Name = "${var.prefix}-capi-security-group"
   }
 
   lifecycle {
@@ -182,5 +182,5 @@ resource "aws_security_group_rule" "cloud_controller_egress_for_s3" {
 ### Outputs for scripts to use
 
 output "cloud_controller_security_group_id" {
-  value = "aws_security_group.cloud_controller.id"
+  value = "${aws_security_group.cloud_controller.id}"
 }
