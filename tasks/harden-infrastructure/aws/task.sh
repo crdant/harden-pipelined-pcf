@@ -13,32 +13,5 @@ get_ips() {
   github_ips=$(curl -s https://api.github.com/meta | jq '.git')
 }
 
-# write the variables to a template with default values
-# this is a hack right due to https://github.com/hashicorp/terraform/issues/16197
-write_var_file() {
-  var_file=pcf-pipelines/install-pcf/${iaas}/terraform/harden-vars.tf
-  cat <<TFVARS > ${var_file}
-/*
-  Whitelist variables
- */
-
-variable "github_ips" {
-  type = "list"
-  default = ${github_ips}
-}
-
-variable "ec2_ips" {
-  type = "list"
-  default = ${ec2_ips}
-}
-
-variable "cloudfront_ips" {
-  type = "list"
-  default = ${cloudfront_ips}
-}
-TFVARS
-}
-
 copy_templates
 get_ips
-write_var_file
