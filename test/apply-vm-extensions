@@ -1,0 +1,100 @@
+#!/usr/bin/env bash
+
+set -eu
+
+base_dir="$(dirname $(dirname $0))"
+incomplete=0
+target=
+opsman_target=
+opsman_user=
+opsman_password=
+
+usage () {
+  message="$(basename $0) --target CONCOURSE_TARGET --api OPSMAN_URL [--user OPSMAN_ADMIN_USERNAME] [--password OPSMAN_ADMIN_PASSWORD]"
+  (>&2 echo "${message}")
+}
+
+parse_args () {
+  if [[ $# -gt 0 ]]; then
+    while [ $# -gt 0 ]; do
+      case $1 in
+        --target | -t )
+          target=$2
+          shift
+          ;;
+        --api | -a )
+          opsman_target=$2
+          shift
+          ;;
+        --user | -u )
+          opsman_user=$2
+          shift
+          ;;
+        --password | -p )
+          opsman_password=$2
+          shift
+          ;;
+        * )
+          (>&2 echo "Unrecognized option: $1")
+          usage
+          exit 1
+          ;;
+      esac
+      shift
+    done
+  fi
+
+  if [[ -z "${target}" ]] ; then
+    incomplete=1
+  fi
+
+  if [[ -z "${opsman_target}" ]] ; then
+    incomplete=1
+  fi
+
+  if [[ -z "${opsman_user}" ]] ; then
+    echo -n "Ops Manager User> "
+    read -s opsman_user
+  fi
+
+  if [[ -z "${opsman_password}" ]] ; then
+    echo -n "Ops Manager Password> "
+    read -s opsman_password
+  fi
+
+  if [[ ${incomplete} -ne 0 ]] ; then
+    usage
+    exit ${incomplete}
+  fi
+}
+
+
+execute () {
+  state_dir="$(mktemp -d)/state"
+  output_dir="${base_dir}/output"
+
+  if [[ ! -d "${state_dir}" ]] ; then
+    mkdir "${state_dir}"
+  fi
+
+  if [[ -f "${output_dir}/terraform.tfstate" ]] ; then
+    cp ${output_dir}/terraform.tfstate ${state_dir}/terraform.tfstate
+  fi
+
+  # pass parameters
+  export opsman_target
+  export opsman_user
+  export opsman_password
+
+  fly --target ${target} execute \
+    --config ${base_dir}/tasks/apply-vm-extensions/aws/task.yml \
+    --input harden-pipelined-pcf=${base_dir} \
+    --input terraform-state=${state_dir}
+}
+
+main () {
+  parse_args $@
+  execute
+}
+
+main $@

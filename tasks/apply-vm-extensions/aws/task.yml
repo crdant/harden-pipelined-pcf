@@ -8,10 +8,11 @@ image_resource:
     tag: v0.2.7
 
 inputs:
-- name: terraform-state-input
+- name: harden-pipelined-pcf
+- name: terraform-state
 
 run:
-  path: harden-pipelined-pcf/tasks/apply-vm-extensioins/aws/task.sh
+  path: harden-pipelined-pcf/tasks/apply-vm-extensions/aws/task.sh
 
 params:
   opsman_target:
