@@ -13,7 +13,7 @@ variable "cloudfront_ips" {
 
 ### Extant Security Groups
 data "aws_security_group" "opsman" {
-  name = "${var.prefix}-pcf_opsman_sg"
+  name = "${var.prefix}-pcf_director_sg"
 }
 
 data "aws_security_group" "pcf_http_lb" {
@@ -25,7 +25,7 @@ data "aws_security_group" "pcf_ssh_lb" {
 }
 
 data "aws_security_group" "pcf_tcp_lb" {
-  name = "${var.prefix}-pcf_PcfTcpElb_sg"
+  name = "${var.prefix}-pcf_PcfTcoElb_sg"
 }
 
 data "aws_security_group" "pcf_default" {
