@@ -10,9 +10,6 @@ image_resource:
 inputs:
 - name: terraform-state-input
 
-outputs:
-- name: terraform-state-output
-
 run:
   path: harden-pipelined-pcf/tasks/apply-vm-extensioins/aws/task.sh
 
