@@ -58,35 +58,37 @@ parse_args () {
 }
 
 execute () {
-  export prefix
-  export region
-  export access_key_id=${AWS_ACCESS_KEY_ID}
-  export secret_access_key=${AWS_SECRET_ACCESS_KEY}
-  export state_dir="${base_dir}/state"
-  export output_dir="${base_dir}/output"
-  export iaas=aws
+  state_dir="$(mktemp -d)/state"
+  output_dir="${base_dir}/output"
 
   if [[ ! -d "${state_dir}" ]] ; then
     mkdir "${state_dir}"
-  fi
-
-  if [[ ! -f "${state_dir}/terraform.tfstsate" ]] ; then
-    touch "${state_dir}/terraform.tfstsate"
   fi
 
   if [[ ! -d "${output_dir}" ]] ; then
     mkdir "${output_dir}"
   fi
 
+  if [[ ! -f "${output_dir}/terraform.tfstate" ]] ; then
+    touch "${output_dir}/terraform.tfstate"
+  fi
+
+  if [[ -f "${output_dir}/terraform.tfstate" ]] ; then
+    cp ${output_dir}/terraform.tfstate ${state_dir}/terraform.tfstate
+  fi
+
+  # provide parameters
+  export prefix
+  export region
+  export access_key_id=${AWS_ACCESS_KEY_ID}
+  export secret_access_key=${AWS_SECRET_ACCESS_KEY}
+  export iaas=aws
+
   fly --target ${target} execute \
     --config ${base_dir}/tasks/harden-infrastructure/aws/task.yml \
     --input harden-pipelined-pcf=${base_dir} \
     --input terraform-state-input=${state_dir} \
     --output terraform-state-output=${output_dir}
-
-  if [[ -f "${output_dir}/terraform.tfstate" ]] ; then
-    cp ${output_dir}/terraform.tfstate ${state_dir}/terraform.tfstate
-  fi
 }
 
 main () {
