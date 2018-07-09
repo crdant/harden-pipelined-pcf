@@ -12,7 +12,7 @@ From there, create the pipeline, unpause it, and kick it off manually.
 ```
 fly -t ${CONCOURSE} set-pipepline -p harden-pcf -c pipeline.yml -l params.yml
 fly -t ${CONCOURSE} unpause-pipeline -p harden-pcf
-fly -t ${CONCOURSE} trigger-job -j harden-pcf/initialize-terraform-state
+fly -t ${CONCOURSE} trigger-job -j harden-pcf/bootstrap-terraform-state
 fly -t ${CONCOURSE} trigger-job -j harden-pcf/harden-infrastructure
 ```
 
