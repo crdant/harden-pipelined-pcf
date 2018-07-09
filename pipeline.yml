@@ -1,0 +1,106 @@
+jobs:
+  - name: bootstrap-terraform-state
+    plan:
+    - do:
+      - get: pcf-pipelines-tarball
+      - config:
+          image_resource:
+            source:
+              repository: pcfnorm/rootfs
+              tag: v0.2.7
+            type: docker-image
+          inputs:
+          - name: pcf-pipelines-tarball
+          outputs:
+          - name: pcf-pipelines
+          platform: linux
+          run:
+            args:
+            - -c
+            - tar -xvf pcf-pipelines-tarball/*.tgz
+            path: bash
+        task: unpack-tarball
+    - file: pcf-pipelines/tasks/create-initial-terraform-state/task.yml
+      params:
+        AWS_ACCESS_KEY_ID: ((access_key_id))
+        AWS_SECRET_ACCESS_KEY: ((secret_access_key))
+        S3_BUCKET_TERRAFORM: ((terraform_bucket))
+        S3_ENDPOINT: ((s3_endpoint))
+        S3_REGION: ((region))
+      task: create-terraform-state
+    serial_groups:
+    - terraform
+
+  - name: harden-infrastructure
+    plan:
+    - get: harden-pipelined-pcf
+    - get: terraform-state
+    - task: harden-network
+      file: harden-pipelined-pcf/tasks/harden-network/aws/task.yml
+      params:
+        access_key_id: ((access_key_id))
+        secret_access_key: ((secret_access_key))
+        iaas: ((iaas))
+        region: ((aws_region))
+        prefix: ((prefix))
+      ensure:
+        put: terraform-state
+        params:
+          file: terraform-state-output/terraform.tfstate
+
+  - name: harden-director
+    plan:
+    - get: harden-pipelined-pcf
+      trigger: true
+      passed:
+      - harden-infrastructure
+    - task: harden-director
+      file: harden-pipelined-pcf/tasks/harden-director/aws/task.yml
+      params:
+        opsman_target: ((opsman_target))
+        opsman_user: ((opsman_user))
+        opsman_password: ((opsman_password))
+    - task: apply-vm-extensions
+      file: harden-pipelined-pcf/tasks/apply-vm-extensions/aws/task.yml
+      params:
+        opsman_target: ((opsman_target))
+        opsman_user: ((opsman_user))
+        opsman_password: ((opsman_password))
+    - task: apply-changes
+      file: pcf-pipelines/tasks/apply-changes/task.yml
+      params:
+        OPSMAN_CLIENT_ID: ""
+        OPSMAN_CLIENT_SECRET: ""
+        OPSMAN_DOMAIN_OR_IP_ADDRESS: ((opsman_target))
+        OPSMAN_USERNAME: ((opsman_user)
+        OPSMAN_PASSWORD: ((opsman_password))
+
+resources:
+- name: harden-pipelined-pcf
+  type: git
+  source:
+    uri: https://github.com/crdant/harden-pipelined-pcf.git
+- name: terraform-state
+  source:
+    access_key_id: ((access_key_id))
+    bucket: ((terraform_bucket))
+    disable_ssl: false
+    endpoint: ((s3_endpoint))
+    region_name: ((region))
+    secret_access_key: ((secret_access_key))
+    versioned_file: terraform.tfstate
+  type: s3
+- name: pcf-pipelines-tarball
+  source:
+    api_token: ((pivnet_token))
+    product_slug: pcf-automation
+    product_version: ((pcf_pipelines_version))
+  type: pivnet
+
+
+resource_types:
+- name: pivnet
+  source:
+    repository: pivotalcf/pivnet-resource
+    tag: latest-final
+  type: docker-image

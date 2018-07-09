@@ -1,0 +1,27 @@
+# the IaaS your foundation is installed on. Currently only implemented for AWS, so use `aws` here.
+iaas: aws
+
+# the prefix you chose for terraform in the PCF pipelines (`TERRAFORM_PREFIX` in the AWS install `params.yml`)
+prefix: CHANGEME
+
+# The credentials to use with AWS. Should be an IAM account, and ideally you will put these values in secrets management
+access_key_id:  CHANGEME           # sensitive
+secret_access_key: CHANGEME        # sensitive
+
+# the region your foundation is installed in
+region: CHANGEME
+
+# the full URL to the PCF operations manager for the foundation you want to harden
+opsman_target: CHANGEME
+
+# username and password to use to connect to the PCF Operations Manager, ideally put these in secrets management
+opsman_user:  CHANGEME            # sensitive
+opsman_password: CHANGEME         # sensitive
+
+# bucket to maintain terraform state in S3 - this SHOULD NOT BE the bucket you used for the PCF pipelines
+terraform_bucket: CHANGEME
+s3_endpoint: CHANGEME
+
+# old-style token to access the Pivotal Network to access the PCF pipelines, ideally put this in secrets management
+pivnet_token: CHANGEME            # sensitive
+pcf_pipelines_version: v0.23.5    # change if you're using a different version, YMMV
